@@ -109,6 +109,7 @@ nav a:hover { color: var(--brass); }
   border-radius: 999px; border: 1px solid var(--line); background: var(--bg-raise); padding: 10px 14px;
 }
 .primary { background: var(--brass); color: #24180c; border-color: transparent; font-weight: 700; }
+#play-inline { color: #fff; }
 .danger { color: #ffd0c8; border-color: rgba(225, 93, 76, 0.45); }
 button:disabled { opacity: 0.4; cursor: not-allowed; }
 .table:disabled { opacity: 1; cursor: default; }
