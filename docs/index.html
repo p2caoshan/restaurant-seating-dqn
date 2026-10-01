@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Five Tables · Double DQN restaurant seating</title>
+  <meta name="description" content="Public seating desk for a five-table restaurant. Host the room yourself, or watch a Double DQN agent protect large tables for higher-value parties.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314110e'/%3E%3Crect x='6' y='8' width='20' height='14' rx='7' fill='%23e4b15a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Fraunces:opsz,wght@9..144,560;9..144,650&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="wrap top">
+    <div>
+      <p class="eyebrow">ESSEC &amp; CentraleSupélec</p>
+      <h1>Five Tables</h1>
+      <p class="lede">A public seating desk for one dinner service. Take the door yourself, or let a Double DQN agent decide who sits where. The agent learns to hold large tables for parties that pay more.</p>
+    </div>
+    <nav>
+      <a href="#desk">Desk</a>
+      <a href="#results">Results</a>
+      <a href="#method">Method</a>
+    </nav>
+  </header>
+
+  <p id="boot" class="wrap">Loading the dining room…</p>
+  <main id="app" class="wrap" hidden>
+    <section class="desk" id="desk">
+      <div class="room" id="room" aria-label="Dining room">
+        <p class="room-kicker">Dining room · 18 seats</p>
+        <button type="button" class="table cap-4 t1" data-table="0"></button>
+        <button type="button" class="table cap-2 t2" data-table="1"></button>
+        <button type="button" class="table cap-2 t3" data-table="2"></button>
+        <button type="button" class="table cap-4 t4" data-table="3"></button>
+        <button type="button" class="table cap-6 t5" data-table="4"></button>
+      </div>
+      <aside class="door">
+        <div class="row">
+          <h2>At the door</h2>
+          <p id="clock" class="money"></p>
+        </div>
+        <div id="party"></div>
+        <div id="queue" class="queue-rest"></div>
+        <div id="actions" class="actions"></div>
+        <p id="explain" class="explain"></p>
+        <div id="qbars" class="qbars"></div>
+      </aside>
+    </section>
+
+    <section class="metrics" id="metrics" aria-label="Shift totals"></section>
+
+    <section class="controls" aria-label="Service controls">
+      <div class="seg" id="policies" role="group" aria-label="Who is hosting">
+        <button type="button" data-policy="host">You host</button>
+        <button type="button" data-policy="dqn">Double DQN</button>
+        <button type="button" data-policy="greedy">Greedy</button>
+        <button type="button" data-policy="fcfs">FCFS</button>
+      </div>
+      <button type="button" class="primary" id="play">Play service</button>
+      <button type="button" id="step">Step</button>
+      <div class="seg" id="speeds" role="group" aria-label="Speed">
+        <button type="button" data-speed="650">Slow</button>
+        <button type="button" data-speed="160" aria-pressed="true">Steady</button>
+        <button type="button" data-speed="36">Fast</button>
+      </div>
+      <label>Night seed
+        <input id="seed" type="number" min="1" max="999999" value="7">
+      </label>
+      <button type="button" id="fresh">New night</button>
+      <button type="button" id="deferral">Show a deferral</button>
+      <label class="row" style="flex-direction:row;align-items:center;gap:8px;">
+        <input id="peek" type="checkbox"> Peek at the DQN
+      </label>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <h2>This service</h2>
+        <button type="button" class="ghost" id="compare-nights">Compare 30 nights</button>
+      </div>
+      <svg id="spark" class="spark" viewBox="0 0 640 72" role="img" aria-label="Revenue during this service"></svg>
+      <div id="score" class="score"></div>
+      <p id="bench" class="note"></p>
+      <ul id="log" class="log"></ul>
+    </section>
+
+    <section class="panel" id="results">
+      <div class="split">
+        <div>
+          <h2>What the agent learned</h2>
+          <p class="note">Validation revenue during training. The brass and red lines are FCFS and the greedy host on the same validation nights.</p>
+          <svg id="curve" viewBox="0 0 640 240" width="100%" height="240" role="img" aria-label="Training curve"></svg>
+        </div>
+        <div class="study-grid" id="study"></div>
+      </div>
+    </section>
+
+    <section class="panel method" id="method">
+      <div>
+        <h2>The decision</h2>
+        <p class="note">Each minute the host sees the party at the head of the line and chooses one of seven actions: ask them to wait, turn them away, or seat them at a specific table. A seat is legal only when the table is free and large enough. The shift lasts 240 minutes, with arrivals slow, then heavy, then quiet.</p>
+        <ul>
+          <li>Tables seat 4, 2, 2, 4, and 6 guests.</li>
+          <li>A party of two pays $40. A party of six pays $120.</li>
+          <li>The state is 12 numbers: time left, five tables, the queue, the party, and the phase of service.</li>
+          <li>The network is a Double DQN with two hidden layers of 64 units, γ = 0.98, and invalid seats masked out.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>How to read a choice</h2>
+        <p class="note">First-come, first-served sits the party at the first table that fits. The greedy host prefers a tight fit and will turn away a small party rather than waste the six-top before late service. The DQN can do the same thing for a different reason: the Q-values say a larger check is likely before that table would free.</p>
+        <p class="note">Keys: 1–5 seat, W wait, X turn away, Space plays an automatic host.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">
+    <p>Project report by Javiera Bao, Shan Cao, and Tamara Dokic · Master in Data Sciences &amp; Business Analytics, ESSEC &amp; CentraleSupélec.</p>
+    <p><a href="report.pdf">Read the report</a> · <a href="https://github.com/p2caoshan/restaurant-seating-dqn">Source</a></p>
+  </footer>
+  <p id="live" class="sr-only" aria-live="polite"></p>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

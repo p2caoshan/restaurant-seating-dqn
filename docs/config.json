@@ -1,0 +1,62 @@
+{
+  "tables": [
+    4,
+    2,
+    2,
+    4,
+    6
+  ],
+  "shift": 240,
+  "phases": [
+    {
+      "name": "Early",
+      "start": 0,
+      "end": 80,
+      "lambda": 0.15
+    },
+    {
+      "name": "Peak",
+      "start": 80,
+      "end": 160,
+      "lambda": 0.44999999999999996
+    },
+    {
+      "name": "Late",
+      "start": 160,
+      "end": 240,
+      "lambda": 0.1
+    }
+  ],
+  "size_probs": [
+    0.08,
+    0.32,
+    0.22,
+    0.18,
+    0.08,
+    0.12
+  ],
+  "duration_base": 20,
+  "duration_per_guest": 5,
+  "revenue_per_guest": 20,
+  "reservation_prob": 0.28,
+  "patience_base": 18,
+  "patience_per_guest": 4,
+  "max_queue": 8,
+  "reward": {
+    "fit_exact": 20.0,
+    "fit_near": 10.0,
+    "reservation": 15.0,
+    "peak": 4.0,
+    "prompt_base": 10.0,
+    "prompt_per_min": 0.4,
+    "waste_per_slack": 8.0,
+    "waste_per_slack_late": 3.0,
+    "reject_reservation": 8.0,
+    "reject_other": 1.0,
+    "wait": 0.2,
+    "renege": 6.0,
+    "close_per_party": 5.0,
+    "invalid": 25.0,
+    "train_divisor": 50.0
+  }
+}
